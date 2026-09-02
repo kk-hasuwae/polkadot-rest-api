@@ -63,10 +63,11 @@ read_release() {
     printf '%s' "$output"
     return 0
   fi
-  if grep -Fq '(HTTP 404)' <<<"$output"; then
+  if is_missing_release_error "$output"; then
     return 1
   fi
-  die "could not inspect release ${RELEASE_TAG}: ${output}"
+  printf '%s' "$output"
+  return 2
 }
 
 assert_publisher_tag_absent() {
@@ -134,6 +135,10 @@ while IFS= read -r row; do
   if [[ "$status" == revoked ]]; then
     if metadata=$(read_release); then
       die "revoked release ${RELEASE_TAG} is still published; quarantine it and remove its downloadable assets"
+    else
+      read_status=$?
+      (( read_status == 1 )) \
+        || die "could not inspect release ${RELEASE_TAG}: ${metadata}"
     fi
     continue
   fi
@@ -143,6 +148,9 @@ while IFS= read -r row; do
     validate_existing_release "$metadata"
     printf 'Existing release %s is complete, immutable, and matches provenance.\n' "$RELEASE_TAG"
   else
+    read_status=$?
+    (( read_status == 1 )) \
+      || die "could not inspect release ${RELEASE_TAG}: ${metadata}"
     assert_publisher_tag_absent
     printf '%s\n' "$row" >>"$pending_file"
   fi

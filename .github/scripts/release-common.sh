@@ -8,6 +8,12 @@ die() {
   exit 1
 }
 
+is_missing_release_error() {
+  local output=$1
+  grep -Fqx 'release not found' <<<"$output" \
+    || grep -Fq '(HTTP 404)' <<<"$output"
+}
+
 require_release_environment() {
   local name
   for name in \

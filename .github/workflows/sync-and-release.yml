@@ -1,5 +1,6 @@
 name: Audit approved upstream releases and publish binaries
 
+# Both triggers are discovered from the repository's default branch (`ci`).
 on:
   schedule:
     - cron: "17 3 * * *"
