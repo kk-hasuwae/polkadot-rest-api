@@ -125,6 +125,7 @@ jq -n \
   --arg tag_object "$UPSTREAM_TAG_OBJECT" \
   --arg commit "$UPSTREAM_COMMIT" \
   --arg version "$VERSION" \
+  --arg signature_policy "$(signature_policy)" \
   --arg release_tag "$RELEASE_TAG" \
   --arg publisher_commit "$PUBLISHER_COMMIT" \
   --arg reviewed_at "$REVIEWED_AT" \
@@ -149,7 +150,7 @@ jq -n \
       tag_object: $tag_object,
       commit: $commit,
       version: $version,
-      signature_policy: "github-verified-annotated-tag"
+      signature_policy: $signature_policy
     },
     release: {tag: $release_tag, publisher_commit: $publisher_commit},
     review: {reviewed_at: $reviewed_at, reference: $review_reference},

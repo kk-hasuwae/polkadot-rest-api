@@ -7,8 +7,9 @@ Upstream publishes source releases, not official prebuilt binaries.
 This is a publisher, not a source mirror. Upstream branches, tags, and workflow
 files are deliberately not pushed here. Every build must first be added to
 [`approved-releases.json`](approved-releases.json) with a reviewed stable SemVer
-tag, GitHub-verified annotated-tag object, peeled commit, immutable builder and
-runtime image manifests, and source/security review record.
+tag, its GitHub-verified signature evidence (see "Accepted upstream tag forms"
+below), immutable builder and runtime image manifests, and a source/security
+review record.
 
 ## Download and verify
 
@@ -37,19 +38,19 @@ The exact release asset set is:
 - the matching `.sha256`
 - the matching `.provenance.json`
 
-The provenance records the signed upstream tag object and commit, publisher
-workflow commit, reviewed base-image digests, source-input hashes, build run,
-artifact size, and artifact SHA-256. Also confirm that the publisher release tag
-points to the recorded publisher commit. It points to trusted code on `ci`, never
-to upstream source.
+The provenance records the upstream tag object and commit, the signature
+policy that verified them, the publisher workflow commit, reviewed base-image
+digests, source-input hashes, build run, artifact size, and artifact SHA-256.
+Also confirm that the publisher release tag points to the recorded publisher
+commit. It points to trusted code on `ci`, never to upstream source.
 
 ## Mandatory adoption policy
 
 The co-located checksum establishes consistency, not independent trust. Before a
 new publisher revision is used in production:
 
-1. Review the exact upstream source commit and Dockerfile, the signed upstream
-   tag, and the publisher commit that approved it.
+1. Review the exact upstream source commit and Dockerfile, the upstream tag and
+   its signature evidence, and the publisher commit that approved it.
 2. Review the public build log and provenance. Verify the artifact attestation
    names this repository and `.github/workflows/sync-and-release.yml`; confirm
    its workflow ref/commit is the publisher commit recorded in provenance.
@@ -72,9 +73,10 @@ artifact staging.
 
 The scheduled/manual workflow performs three separated phases:
 
-1. A read-only audit validates each approval against the live upstream signed
-   tag and audits any existing release's exact assets and hashes. New upstream
-   stable tags are listed only as a human review queue.
+1. A read-only audit validates each approval against the live upstream tag and
+   its GitHub signature status, and audits any existing release's exact assets
+   and hashes. New upstream stable tags are listed only as a human review
+   queue.
 2. A bounded, read-only job builds at most two approved releases serially, with
    a 45-minute timeout. It fetches the pinned commit, substitutes only the two
    reviewed base-image manifests, and rejects symlinks, special files, implausible
@@ -83,6 +85,21 @@ The scheduled/manual workflow performs three separated phases:
    treats the transferred bundle strictly as data, revalidates it without
    execution, generates GitHub artifact attestations, and creates a draft. The
    exact uploaded files are downloaded and compared before publication.
+
+### Accepted upstream tag forms
+
+Annotated tag: the record holds the tag object SHA and the peeled commit. The
+audit requires the tag object to carry a GitHub-verified, valid signature and
+to peel to the recorded commit. Provenance `signature_policy` is
+`github-verified-annotated-tag`.
+
+Lightweight tag: the record holds the commit SHA in both fields, which is what
+marks it as lightweight. The audit requires the ref to still point at that
+commit, the commit's own GitHub-verified, valid signature, and the commit to
+be reachable from upstream `main`. Provenance `signature_policy` is
+`github-verified-commit-lightweight-tag`. Upstream's RELEASE.md creates
+lightweight tags, so this is the common case. The annotated form is preferred,
+and upstream has been asked to sign tags (paritytech/polkadot-rest-api#418).
 
 Published releases are never clobbered or rebuilt in place. A changed build gets
 a new publisher revision. Upstream tag movement/deletion, signature failure,

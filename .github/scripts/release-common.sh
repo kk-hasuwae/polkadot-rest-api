@@ -17,9 +17,9 @@ is_missing_release_error() {
 require_release_environment() {
   local name
   for name in \
-    UPSTREAM_REPOSITORY UPSTREAM_URL PUBLISHER_COMMIT UPSTREAM_TAG \
-    UPSTREAM_TAG_OBJECT UPSTREAM_COMMIT VERSION RELEASE_TAG BUILDER_BASE \
-    RUNTIME_BASE REVIEWED_AT REVIEW_REFERENCE; do
+    UPSTREAM_REPOSITORY UPSTREAM_URL UPSTREAM_DEFAULT_BRANCH PUBLISHER_COMMIT \
+    UPSTREAM_TAG UPSTREAM_TAG_OBJECT UPSTREAM_COMMIT VERSION RELEASE_TAG \
+    BUILDER_BASE RUNTIME_BASE REVIEWED_AT REVIEW_REFERENCE; do
     [[ -n "${!name:-}" ]] || die "required environment variable ${name} is empty"
   done
 }
@@ -41,6 +41,8 @@ validate_release_environment() {
     || die "invalid upstream commit SHA"
   [[ "$PUBLISHER_COMMIT" =~ ^[0-9a-f]{40}$ ]] \
     || die "invalid publisher commit SHA"
+  [[ "$UPSTREAM_DEFAULT_BRANCH" =~ ^[0-9A-Za-z._-]+$ ]] \
+    || die "invalid upstream default branch name"
   [[ "$BUILDER_BASE" =~ ^docker\.io/library/rust:[0-9A-Za-z._-]+@sha256:[0-9a-f]{64}$ ]] \
     || die "builder image is not an immutable official-library Rust reference"
   [[ "$RUNTIME_BASE" =~ ^docker\.io/library/debian:[0-9A-Za-z._-]+@sha256:[0-9a-f]{64}$ ]] \
@@ -63,8 +65,32 @@ provenance_name() {
   printf '%s.provenance.json' "$(binary_name)"
 }
 
+# A lightweight upstream tag is approved by recording the commit SHA in both
+# upstream_tag_object and upstream_commit. Upstream's RELEASE.md creates tags
+# with a plain `git tag`, so this is the expected form; an annotated tag with
+# a GitHub-verified signature remains the preferred one.
+is_lightweight_approval() {
+  [[ "$UPSTREAM_TAG_OBJECT" == "$UPSTREAM_COMMIT" ]]
+}
+
+signature_policy() {
+  if is_lightweight_approval; then
+    printf 'github-verified-commit-lightweight-tag'
+  else
+    printf 'github-verified-annotated-tag'
+  fi
+}
+
+signature_policy_description() {
+  if is_lightweight_approval; then
+    printf 'GitHub-verified commit signature (lightweight upstream tag)'
+  else
+    printf 'GitHub-verified annotated tag'
+  fi
+}
+
 verify_upstream_approval() {
-  local refs direct peeled tag_json
+  local refs direct peeled tag_json commit_json comparison
 
   refs=$(git ls-remote "$UPSTREAM_URL" \
     "refs/tags/${UPSTREAM_TAG}" "refs/tags/${UPSTREAM_TAG}^{}") \
@@ -74,6 +100,27 @@ verify_upstream_approval() {
 
   [[ "$direct" == "$UPSTREAM_TAG_OBJECT" ]] \
     || die "upstream tag ${UPSTREAM_TAG} was deleted or moved (tag object ${direct:-missing})"
+
+  if is_lightweight_approval; then
+    # The ref is the commit itself, so the commit's own GitHub-verified
+    # signature and its presence on the upstream default branch stand in for
+    # the annotated-tag signature.
+    commit_json=$(gh api "repos/${UPSTREAM_REPOSITORY}/git/commits/${UPSTREAM_COMMIT}") \
+      || die "could not retrieve GitHub verification for commit ${UPSTREAM_COMMIT}"
+    jq -e --arg commit "$UPSTREAM_COMMIT" \
+      '.sha == $commit and
+       .verification.verified == true and .verification.reason == "valid"' \
+      <<<"$commit_json" >/dev/null \
+      || die "upstream commit ${UPSTREAM_COMMIT} signature is not GitHub-verified and valid"
+    comparison=$(gh api \
+      "repos/${UPSTREAM_REPOSITORY}/compare/${UPSTREAM_COMMIT}...${UPSTREAM_DEFAULT_BRANCH}" \
+      --jq '.status') \
+      || die "could not compare commit ${UPSTREAM_COMMIT} with upstream ${UPSTREAM_DEFAULT_BRANCH}"
+    [[ "$comparison" == ahead || "$comparison" == identical ]] \
+      || die "approved commit ${UPSTREAM_COMMIT} is not on upstream ${UPSTREAM_DEFAULT_BRANCH}"
+    return 0
+  fi
+
   [[ "$peeled" == "$UPSTREAM_COMMIT" ]] \
     || die "upstream tag ${UPSTREAM_TAG} no longer peels to the approved commit"
 

@@ -76,7 +76,7 @@ Approved, unmodified upstream source built with pinned base-image manifests.
 - Upstream tag: ${UPSTREAM_TAG}
 - Upstream tag object: ${UPSTREAM_TAG_OBJECT}
 - Upstream commit: ${UPSTREAM_COMMIT}
-- Upstream signature policy: GitHub-verified annotated tag
+- Upstream signature policy: $(signature_policy_description)
 - Source/security review: ${REVIEWED_AT} — ${REVIEW_REFERENCE}
 - Publisher workflow commit: ${PUBLISHER_COMMIT}
 - Builder base: ${BUILDER_BASE}

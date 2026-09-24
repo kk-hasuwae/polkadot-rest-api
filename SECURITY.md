@@ -39,8 +39,11 @@ found, then rotate them first and coordinate the force-push against branch rules
 An approval is a deliberate security change, not discovery automation:
 
 1. Review the upstream diff, release notes, Dockerfile, Cargo lockfile, and known
-   vulnerabilities. Verify the annotated-tag signature and record both the tag
-   object SHA and peeled commit.
+   vulnerabilities. For an annotated tag, verify its GitHub signature status
+   and record the tag object SHA and peeled commit. For a lightweight tag,
+   verify the commit's own GitHub signature status and that it is on upstream
+   `main`, then record the commit SHA in both fields (see README.md, "Accepted
+   upstream tag forms").
 2. Resolve the Dockerfile's linux/amd64 builder/runtime tags to immutable manifest
    digests. Add a new record to `approved-releases.json` with a new publisher
    revision tag. Never reuse a published publisher tag.

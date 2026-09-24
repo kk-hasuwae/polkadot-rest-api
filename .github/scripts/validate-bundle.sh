@@ -40,6 +40,7 @@ jq -e \
   --arg tag_object "$UPSTREAM_TAG_OBJECT" \
   --arg commit "$UPSTREAM_COMMIT" \
   --arg version "$VERSION" \
+  --arg signature_policy "$(signature_policy)" \
   --arg release_tag "$RELEASE_TAG" \
   --arg builder "$BUILDER_BASE" \
   --arg runtime "$RUNTIME_BASE" \
@@ -55,7 +56,7 @@ jq -e \
    .upstream.tag_object == $tag_object and
    .upstream.commit == $commit and
    .upstream.version == $version and
-   .upstream.signature_policy == "github-verified-annotated-tag" and
+   .upstream.signature_policy == $signature_policy and
    .release.tag == $release_tag and
    .release.publisher_commit == $publisher_commit and
    .review.reviewed_at == $reviewed_at and

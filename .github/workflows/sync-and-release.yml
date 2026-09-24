@@ -16,6 +16,8 @@ concurrency:
 env:
   UPSTREAM_REPOSITORY: paritytech/polkadot-rest-api
   UPSTREAM_URL: https://github.com/paritytech/polkadot-rest-api.git
+  # A lightweight upstream tag is accepted only if its commit is on this branch.
+  UPSTREAM_DEFAULT_BRANCH: main
 
 jobs:
   plan:
