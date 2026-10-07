@@ -1,24 +1,53 @@
-# polkadot-rest-api reviewed binary publisher
+# polkadot-rest-api binaries: prebuilt Linux x86-64 downloads
 
-This repository publishes Linux x86-64 binaries for selected releases of
-[paritytech/polkadot-rest-api](https://github.com/paritytech/polkadot-rest-api).
-Upstream publishes source releases, not official prebuilt binaries.
+Download prebuilt, reviewed Linux x86-64 binaries of
+[paritytech/polkadot-rest-api](https://github.com/paritytech/polkadot-rest-api),
+the Rust REST API for Polkadot, Kusama, Asset Hub and other Substrate chains
+and the drop-in replacement for substrate-api-sidecar. Upstream publishes
+source releases and Docker images, not standalone binaries. This repository
+fills that gap: every binary is built from one exact upstream release tag,
+attested by GitHub Actions and published as an immutable GitHub release on
+the [Releases page](https://github.com/kk-hasuwae/polkadot-rest-api/releases).
 
-This is a publisher, not a source mirror. Upstream branches, tags, and workflow
-files are deliberately not pushed here. Every build must first be added to
-[`approved-releases.json`](approved-releases.json) with a reviewed stable SemVer
-tag, its GitHub-verified signature evidence (see "Accepted upstream tag forms"
-below), immutable builder and runtime image manifests, and a source/security
-review record.
+This is a publisher, not a source mirror or a fork. Upstream branches, tags,
+and workflow files are deliberately not pushed here. Every build must first be
+added to [`approved-releases.json`](approved-releases.json) with a reviewed
+stable SemVer tag, its GitHub-verified signature evidence (see "Accepted
+upstream tag forms" below), immutable builder and runtime image manifests, and
+a source/security review record.
+
+## Published binaries
+
+One publisher release per reviewed upstream version, newest first. The asset
+name is `polkadot-rest-api-<upstream-tag>-linux-x86_64`, with a matching
+`.sha256` and `.provenance.json` next to it.
+
+### upstream v0.3.0
+
+- Release: [publisher-v0.3.0-r1](https://github.com/kk-hasuwae/polkadot-rest-api/releases/tag/publisher-v0.3.0-r1)
+- SHA-256: `c84794723c4189349dceb6067c635b22db7f779cff8f5a39688a6c9b343f8e00`
+- Size: 35768552 bytes
+
+### upstream v0.2.1
+
+- Release: [publisher-v0.2.1-r1](https://github.com/kk-hasuwae/polkadot-rest-api/releases/tag/publisher-v0.2.1-r1)
+- SHA-256: `e18411bd744e7ae09ae6b42f1136abf31edaed36ee9b35e61d14216c7748cdae`
+- Size: 35699016 bytes
+
+### upstream v0.2.0
+
+- Release: [publisher-v0.2.0-r1](https://github.com/kk-hasuwae/polkadot-rest-api/releases/tag/publisher-v0.2.0-r1)
+- SHA-256: `d73fd6daf9c291cdd215ad5288d66879f40736d87ccc05e6539373a175722e6f`
+- Size: 35541416 bytes
 
 ## Download and verify
 
 Publisher tags are intentionally distinct from upstream tags. For upstream
-`v0.2.0`, publisher revision 1 is `publisher-v0.2.0-r1`:
+`v0.3.0`, publisher revision 1 is `publisher-v0.3.0-r1`:
 
 ```bash
-UPSTREAM_TAG=v0.2.0
-RELEASE_TAG=publisher-v0.2.0-r1
+UPSTREAM_TAG=v0.3.0
+RELEASE_TAG=publisher-v0.3.0-r1
 REPO=kk-hasuwae/polkadot-rest-api
 ASSET=polkadot-rest-api-${UPSTREAM_TAG}-linux-x86_64
 
@@ -30,6 +59,16 @@ sha256sum -c "${ASSET}.sha256"
 gh attestation verify "${ASSET}" \
   --repo "${REPO}" \
   --signer-workflow "${REPO}/.github/workflows/sync-and-release.yml"
+```
+
+Without the GitHub CLI, the same assets are plain release downloads:
+
+```bash
+BASE=https://github.com/${REPO}/releases/download/${RELEASE_TAG}
+curl -fLO "${BASE}/${ASSET}" \
+     -fLO "${BASE}/${ASSET}.sha256" \
+     -fLO "${BASE}/${ASSET}.provenance.json"
+sha256sum -c "${ASSET}.sha256"
 ```
 
 The exact release asset set is:
