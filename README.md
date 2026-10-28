@@ -22,6 +22,12 @@ One publisher release per reviewed upstream version, newest first. The asset
 name is `polkadot-rest-api-<upstream-tag>-linux-x86_64`, with a matching
 `.sha256` and `.provenance.json` next to it.
 
+### upstream v0.3.3
+
+- Release: [publisher-v0.3.3-r1](https://github.com/kk-hasuwae/polkadot-rest-api/releases/tag/publisher-v0.3.3-r1)
+- SHA-256: `517031f857c8756c94b62946230dc9419c2b0515e4b90d1bb60fadc52724c9ab`
+- Size: 35583904 bytes
+
 ### upstream v0.3.2
 
 - Release: [publisher-v0.3.2-r1](https://github.com/kk-hasuwae/polkadot-rest-api/releases/tag/publisher-v0.3.2-r1)
@@ -55,11 +61,11 @@ name is `polkadot-rest-api-<upstream-tag>-linux-x86_64`, with a matching
 ## Download and verify
 
 Publisher tags are intentionally distinct from upstream tags. For upstream
-`v0.3.2`, publisher revision 1 is `publisher-v0.3.2-r1`:
+`v0.3.3`, publisher revision 1 is `publisher-v0.3.3-r1`:
 
 ```bash
-UPSTREAM_TAG=v0.3.2
-RELEASE_TAG=publisher-v0.3.2-r1
+UPSTREAM_TAG=v0.3.3
+RELEASE_TAG=publisher-v0.3.3-r1
 REPO=kk-hasuwae/polkadot-rest-api
 ASSET=polkadot-rest-api-${UPSTREAM_TAG}-linux-x86_64
 
