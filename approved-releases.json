@@ -71,6 +71,20 @@
       "review_reference": "v0.3.2 review 2026-10-08: signed annotated tag (tarikgul, PR #427); #423 staking-payouts fix, #425 submit logging, #424 CI bump; Dockerfile identical to v0.3.1; lockfile bumps only; audit: h2+rustls inherited; debian digest unchanged",
       "revoked_at": null,
       "revocation_reason": null
+    },
+    {
+      "status": "approved",
+      "upstream_tag": "v0.3.3",
+      "upstream_tag_object": "1f82334615791cb0754a6a93c7d972d983a6fb1d",
+      "upstream_commit": "ede5ea60b53928b065d683b01420c417e75dd391",
+      "version": "0.3.3",
+      "release_tag": "publisher-v0.3.3-r1",
+      "builder_base": "docker.io/library/rust:1.90.0-slim-bookworm@sha256:4f572135209e89d488fadb81d8a07309857f9b9c5280b54c85a44b71629e8cca",
+      "runtime_base": "docker.io/library/debian:bookworm-slim@sha256:ec31d744f83f4a73447ba045aaab9409997efe5cc706eca4890c1be36cc1606a",
+      "reviewed_at": "2026-10-28",
+      "review_reference": "v0.3.3 review 2026-10-28: signed annotated tag (tarikgul, PR #441); #439 v5 General extrinsic signature fix; Dockerfile identical; lockfile bumps only; audit: 9 advisories, all inherited (7 new, low or not reached); debian digest rotated",
+      "revoked_at": null,
+      "revocation_reason": null
     }
   ]
 }
